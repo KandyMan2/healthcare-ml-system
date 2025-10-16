@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Patient Healthcare Data Schema",
+  "description": "Schema for patient healthcare data ensuring HIPAA compliance, data integrity, and reproducibility across ML pipelines",
+  "type": "object",
+  "required": [
+    "patient_id",
+    "age",
+    "diagnosis"
+  ],
+  "properties": {
+    "patient_id": {
+      "type": "string",
+      "description": "Unique anonymized patient identifier for HIPAA compliance. Must not contain PII.",
+      "pattern": "^[A-Z0-9]{8,16}$",
+      "examples": ["PT12345678", "A1B2C3D4E5F6"]
+    },
+    "age": {
+      "type": "integer",
+      "description": "Patient age in years at time of data collection. Ages >89 should be binned as 90+ for HIPAA compliance.",
+      "minimum": 0,
+      "maximum": 120
+    },
+    "diagnosis": {
+      "type": "string",
+      "description": "Primary diagnosis using ICD-10 code for standardization and reproducibility",
+      "pattern": "^[A-Z][0-9]{2}(\\.[0-9]{1,4})?$",
+      "examples": ["E11.9", "I10", "J44.0"]
+    },
+    "gender": {
+      "type": "string",
+      "description": "Patient gender for demographic analysis",
+      "enum": ["male", "female", "other", "unknown"]
+    },
+    "admission_date": {
+      "type": "string",
+      "description": "Date of admission in ISO 8601 format for temporal analysis",
+      "format": "date",
+      "examples": ["2025-01-15"]
+    },
+    "vital_signs": {
+      "type": "object",
+      "description": "Patient vital signs at admission for clinical feature extraction",
+      "properties": {
+        "blood_pressure_systolic": {
+          "type": "number",
+          "description": "Systolic blood pressure in mmHg",
+          "minimum": 0,
+          "maximum": 300
+        },
+        "blood_pressure_diastolic": {
+          "type": "number",
+          "description": "Diastolic blood pressure in mmHg",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "heart_rate": {
+          "type": "number",
+          "description": "Heart rate in beats per minute",
+          "minimum": 0,
+          "maximum": 300
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Body temperature in Celsius",
+          "minimum": 30,
+          "maximum": 45
+        },
+        "respiratory_rate": {
+          "type": "number",
+          "description": "Respiratory rate in breaths per minute",
+          "minimum": 0,
+          "maximum": 60
+        }
+      }
+    },
+    "medications": {
+      "type": "array",
+      "description": "List of current medications using RxNorm codes for standardization",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Medication name"
+          },
+          "rxnorm_code": {
+            "type": "string",
+            "description": "RxNorm concept unique identifier"
+          },
+          "dosage": {
+            "type": "string",
+            "description": "Medication dosage"
+          }
+        }
+      }
+    },
+    "lab_results": {
+      "type": "object",
+      "description": "Laboratory test results using LOINC codes for interoperability",
+      "properties": {
+        "glucose": {
+          "type": "number",
+          "description": "Blood glucose level in mg/dL"
+        },
+        "hemoglobin": {
+          "type": "number",
+          "description": "Hemoglobin level in g/dL"
+        },
+        "creatinine": {
+          "type": "number",
+          "description": "Serum creatinine in mg/dL"
+        }
+      }
+    },
+    "comorbidities": {
+      "type": "array",
+      "description": "List of comorbid conditions using ICD-10 codes",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][0-9]{2}(\\.[0-9]{1,4})?$"
+      }
+    },
+    "data_source": {
+      "type": "string",
+      "description": "Source system or institution (anonymized) for data provenance and reproducibility"
+    },
+    "record_version": {
+      "type": "string",
+      "description": "Schema version for data versioning and backward compatibility",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "examples": ["v1.0.0"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata for audit trails and compliance",
+      "properties": {
+        "created_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when record was created"
+        },
+        "last_modified": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of last modification for audit purposes"
+        },
+        "data_quality_score": {
+          "type": "number",
+          "description": "Data quality score (0-1) for ML pipeline filtering",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "comment": "This schema enforces standardized healthcare data formats for: (1) HIPAA compliance through anonymization requirements, (2) reproducibility via standardized medical codes (ICD-10, RxNorm, LOINC), (3) data validation for ML pipeline integrity, (4) interoperability across healthcare systems, and (5) audit trail maintenance for regulatory compliance."
+}
